@@ -1,0 +1,44 @@
+name: Performance Test
+
+on:
+  workflow_dispatch: 
+jobs:
+  run-performance-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r python-scripts/requirements.txt
+
+    - name: Run Python Tests
+      run: |
+        python python-scripts/api_test.py
+
+    - name: Set up Java for JMeter
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Install JMeter
+      run: sudo apt-get update && sudo apt-get install -y jmeter
+
+    - name: Run JMeter Test
+      run: |
+        jmeter -n -t jmeter-tests/sample-test.jmx -l results.jtl -j jmeter.log
+
+    - name: Generate JMeter HTML Report
+      run: jmeter -g results.jtl -o reports/
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: performance-report
+        path: reports/
