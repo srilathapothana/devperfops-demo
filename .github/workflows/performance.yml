@@ -1,8 +1,7 @@
 name: Performance Test
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch: 
 
 jobs:
   run-performance-tests:
